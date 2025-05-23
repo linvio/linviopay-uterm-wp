@@ -2,14 +2,14 @@
 
 **Security Note**: This plugin is provided as is and it is not intended to be used in production without further customization. Specifically, API keys are stored using WordPress’s options API, which is not encrypted. Ensure your server and site are properly secured before deploying your production keys.
 
-A minimal WordPress plugin that integrates LinvioPay Universal Terminal to process payments on any page or post by means of a provided shortcode. It also provides a minimal admin interface to store API keys securely.
+A minimal WordPress plugin that integrates LinvioPay Universal Terminal to capture payments and save payment methods on any page or post by means of a provided shortcode. It also provides a minimal admin interface.
 
 ## Features
 
-- Admin settings screen to configure Public and Secret API keys
-- Shortcode `[uterm]` to render and initialize the LinvioPay terminal
-- Sends secure API calls to LinvioPay
-- Displays a terminal widget dynamically via JavaScript
+- Minimal Admin settings screen to configure Public and Secret API keys, products and mappings.
+- Shortcode `[uterm]` to render and initialize the LinvioPay terminal.
+- Sends secure API calls to LinvioPay.
+- Displays a terminal widget dynamically via JavaScript.
 
 # Requirements
 
@@ -29,6 +29,8 @@ If you want to locally test this code, you can use the provided `docker-compose.
 
 ## Usage
 
+### Payment capture mode
+
 Add the `[uterm]` shortcode to any page or post where you want the LinvioPay terminal to appear.
 
 Example:
@@ -38,6 +40,25 @@ Example:
 
 [uterm]
 ```
+
+### Payment Method save mode
+
+Add the `[uterm mode="payment_method"]` shortcode to any page or post where you want the LinvioPay terminal to appear.
+
+Example:
+
+```html
+<h1>CheckoutPage</h1>
+
+[uterm mode="payment_method"]
+```
+
+When opening the page containing the terminal, please provide the following URL params:
+
+- **cid**: The Salesforce Contact Synchronization Id. Payment methods saved will be attached to this Salesforce Contact Record.
+- **email**: Salesforce Contact email. Will be used for creating a LinvioPay Contact for the provided `cid` in case it was not previously created.
+- [Optional] **first_name**
+- [Optional] **last_name**
 
 # License
 

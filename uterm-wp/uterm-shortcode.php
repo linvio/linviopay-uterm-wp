@@ -2,8 +2,21 @@
 
 include_once('uterm-common.php');
 
-// Shortcode function
 function uterm_shortcode($atts) {
+    $normalized_atts = shortcode_atts([
+        'mode' => 'payment',
+    ], $atts, 'uterm');
+    $mode = $normalized_atts['mode'];
+
+    if($mode == 'payment_method') {
+        return uterm_payment_method_shortcode($atts);
+    } else {
+        return uterm_payment_shortcode($atts);
+    }
+}
+
+// Shortcode function for Terminal on Payment Mode
+function uterm_payment_shortcode($atts) {
     // Get the secret and public keys from WordPress options and sanitize them
     $secretKey = esc_attr(get_option('secret_key', ''));
     $publicKey = esc_attr(get_option('public_key', ''));
@@ -78,7 +91,8 @@ function uterm_shortcode($atts) {
     return $uterm_panel.$uterm_script;
 }
 
-function uterm_pm_shortcode($atts) {
+// Shortcode function for Terminal on Payment Method mode
+function uterm_payment_method_shortcode($atts) {
     // Get the secret and public keys from WordPress options and sanitize them
     $secretKey = esc_attr(get_option('secret_key', ''));
     $publicKey = esc_attr(get_option('public_key', ''));
@@ -143,8 +157,6 @@ function uterm_pm_shortcode($atts) {
 
 // Register the shortcode
 add_shortcode('uterm', 'uterm_shortcode');
-
-add_shortcode('uterm_pm', 'uterm_pm_shortcode');
 
 // Enqueue the Universal Terminal JS and CSS files
 function enqueue_uterm_files() {
