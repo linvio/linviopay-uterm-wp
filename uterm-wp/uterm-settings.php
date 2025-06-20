@@ -327,7 +327,6 @@ function uterm_migrate_options() {
     $old_options = [
         'public_key' => 'uterm_public_key',
         'secret_key' => 'uterm_secret_key',
-        'store_in_wp_config' => 'uterm_store_in_wp_config',
         'products' => 'uterm_products',
         'is_amount_updatable' => 'uterm_is_amount_updatable',
         'mappings' => 'uterm_mappings'
@@ -335,8 +334,9 @@ function uterm_migrate_options() {
     foreach ($old_options as $old => $new) {
         $value = get_option($old);
         if ($value !== false) {
+            if ($value)
             update_option($new, $value);
-            // delete_option($old); // Uncomment after verifying migration
+            delete_option($old);
         }
     }
 }
