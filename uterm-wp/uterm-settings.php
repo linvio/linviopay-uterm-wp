@@ -334,9 +334,10 @@ function uterm_migrate_options() {
     foreach ($old_options as $old => $new) {
         $value = get_option($old);
         if ($value !== false) {
-            if ($value)
-            update_option($new, $value);
-            delete_option($old);
+            if ($value) {
+                update_option($new, $value);
+                delete_option($old);
+            }
         }
     }
 }
