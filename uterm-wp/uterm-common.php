@@ -31,7 +31,7 @@ function validate_mappings_data($json) {
     if(empty($json)) {
         return true;
     }
-    
+
     // Decode JSON
     $data = json_decode($json, true);
 
@@ -73,7 +73,7 @@ function get_payment_mappings($json) {
 
     preg_match_all('/"\$\{([^}]+)\}"/', $json, $matches);
     $vars = $matches[1];
-    
+
     foreach($vars as $varName) {
         if (!array_key_exists($varName, $_GET)) {
             continue;
@@ -93,7 +93,7 @@ function get_linviopay_contact($syncId, $secretKey) {
             'Content-Type'  => 'application/json',
         ],
     ]);
-    
+
     $status_code = wp_remote_retrieve_response_code($response);
     if (is_wp_error($response)) {
         error_log('Error: ' . $response->get_error_message());
@@ -120,7 +120,7 @@ function create_linviopay_contact($sync_id, $email, $first_name, $last_name, $se
             'synchronization_id' => $sync_id
         ])
     ]);
-    
+
     if (is_wp_error($response)) {
         error_log('Error: ' . $response->get_error_message());
         return null;
