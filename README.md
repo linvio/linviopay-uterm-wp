@@ -1,8 +1,19 @@
 # Minimal LinvioPay Universal Terminal Wordpress plugin
-
-**Security Note**: This plugin is provided as is and it is not intended to be used in production without further customization. Specifically, API keys are stored using WordPress’s options API, which is not encrypted. Ensure your server and site are properly secured before deploying your production keys.
-
 A minimal WordPress plugin that integrates LinvioPay Universal Terminal to capture payments and save payment methods on any page or post by means of a provided shortcode. It also provides a minimal admin interface.
+
+## Security Notice
+
+This plugin is provided as is: API secret key security is the responsibility of the USER and not Linvio, LinvioPay or developers of this plugin. USE AT OWN RISK.
+
+**For sandbox**, and ease of testing, the LinvioPay API keys can be stored simply and easily in WordPress's option table. WE STRONGLY SUGGEST YOU DO NOT USE THIS INSECURE PROCESS FOR PRODUCTION.
+
+![img_1.png](img_1.png)
+
+**For production**, a more secure option for storing API keys is in the wp-config.php file. Please verify your htaccess secures wp-config.php from public web access.
+
+![img_2.png](img_2.png)
+
+**REMEMBER**: API keys are not encrypted, please ensure your server and site are properly secured before deploying your production keys.
 
 ## Features
 
