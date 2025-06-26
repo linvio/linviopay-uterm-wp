@@ -87,7 +87,8 @@ function get_payment_mappings($json) {
 }
 
 function get_linviopay_contact($syncId, $secretKey) {
-    $response = wp_remote_get('https://dev-api.linviopay.com/v2/contacts/' . $syncId, [
+    $base_api_url = get_base_api_url($secretKey);
+    $response = wp_remote_get("$base_api_url/v2/contacts/" . $syncId, [
         'headers' => [
             'Authorization' => "Bearer $secretKey",
             'Content-Type'  => 'application/json',
@@ -108,7 +109,8 @@ function get_linviopay_contact($syncId, $secretKey) {
 function create_linviopay_contact($sync_id, $email, $first_name, $last_name, $secretKey) {
     $first_name = empty($first_name) ? 'N/A' : $first_name;
     $last_name = empty($last_name) ? 'N/A' : $last_name;
-    $response = wp_remote_post('https://dev-api.linviopay.com/v2/contacts', [
+    $base_api_url = get_base_api_url($secretKey);
+    $response = wp_remote_post("$base_api_url/v2/contacts", [
         'headers' => [
             'Authorization' => "Bearer $secretKey",
             'Content-Type'  => 'application/json',
@@ -133,7 +135,8 @@ function create_linviopay_contact($sync_id, $email, $first_name, $last_name, $se
 }
 
 function create_linviopay_payment_method($contact_id, $secretKey) {
-    $response = wp_remote_post('https://dev-api.linviopay.com/v2/payment_methods', [
+    $base_api_url = get_base_api_url($secretKey);
+    $response = wp_remote_post("$base_api_url/v2/payment_methods", [
         'headers' => [
             'Authorization' => "Bearer $secretKey",
             'Content-Type'  => 'application/json',
@@ -147,4 +150,24 @@ function create_linviopay_payment_method($contact_id, $secretKey) {
         return null;
     }
     return wp_remote_retrieve_body($response);
+}
+
+function get_base_api_url($secretKey) {
+    $base_api_url = 'https://dev-api.linviopay.com';
+    if(str_starts_with($secretKey, 'cs_test_')) {
+        $base_api_url = 'https://test-api.linviopay.com';
+    } else if(str_starts_with($secretKey, 'cs_prod_')) {
+        $base_api_url = 'https://api.linviopay.com';
+    }
+    return $base_api_url;
+}
+
+function get_base_static_url($secretKey) {
+    $base_static_url = 'https://uterm-dev.linviopay.com';
+    if(str_starts_with($secretKey, 'cs_test_')) {
+        $base_static_url = 'https://uterm-test.linviopay.com';
+    } else if(str_starts_with($secretKey, 'cs_prod_')) {
+        $base_static_url = 'https://uterm.linviopay.com';
+    }
+    return $base_static_url;
 }
