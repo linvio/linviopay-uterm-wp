@@ -51,7 +51,8 @@ function uterm_payment_shortcode($atts) {
             'is_amount_updatable' => $isAmountUpdatable,
             'mappings' => $payment_mappings
         ])];
-    $response = wp_remote_post('https://dev-api.linviopay.com/v2/payments', $params);
+    $base_api_url = get_base_api_url($secretKey);
+    $response = wp_remote_post("$base_api_url/v2/payments", $params);
 
     if (is_wp_error($response)) {
         error_log('Error: ' . $response->get_error_message());
@@ -133,6 +134,9 @@ function uterm_payment_method_shortcode($atts) {
 
     // Create LinvioPay Payment Method
     $linviopay_payment_method_data = create_linviopay_payment_method($contact_id, $secretKey);
+    if($linviopay_payment_method_data == null) {
+        return '<div>Failed creating payment method.</div>';
+    }
     $linviopay_payment_method = json_decode($linviopay_payment_method_data, true);
     $linviopay_payment_method_id = $linviopay_payment_method['id'];
 
@@ -167,8 +171,11 @@ add_shortcode('uterm', 'uterm_shortcode');
 
 // Enqueue the Universal Terminal JS and CSS files
 function enqueue_uterm_files() {
-    wp_enqueue_script('uterm-js', 'https://uterm-dev.linviopay.com/assets/uterm.js', [], false, true);
-    wp_enqueue_style('uterm-css', 'https://uterm-dev.linviopay.com/assets/uterm.css', [], false);
+    $keys = get_linvio_api_keys();
+    $secretKey = $keys['secret_key'];
+    $base_static_url = get_base_static_url($secretKey);
+    wp_enqueue_script('uterm-js', "$base_static_url/assets/uterm.js", [], false, true);
+    wp_enqueue_style('uterm-css', "$base_static_url/assets/uterm.css", [], false);
 }
 
 add_action('wp_enqueue_scripts', 'enqueue_uterm_files');
