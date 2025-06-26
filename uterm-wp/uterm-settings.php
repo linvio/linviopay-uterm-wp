@@ -184,8 +184,7 @@ add_action('admin_init', function () {
             }
         ]
     }
-]
-                </pre>
+]</pre>
                 <p>Using this configuration, all captured payments will have the <code>related_account__c</code> field filled with the id specified by the URL variable <code>m1</code>.<br>
                     This will map them to a specific Salesforce Account record.</p>
                 <p>For more information on how to configure your payment mappings, please refer to the "mappings" field specification<br>
@@ -239,8 +238,7 @@ function storage_method_field_callback()
             Add the following to <code>wp-config.php</code>:<br>
             <pre style="background-color: #f4f4f4; padding: 10px; border: 1px solid #ccc;">
 define('LINVIOPAY_PUBLIC_KEY', 'your_public_key');
-define('LINVIOPAY_SECRET_KEY', 'your_secret_key');
-            </pre>
+define('LINVIOPAY_SECRET_KEY', 'your_secret_key');</pre>
         </span>
     </p>
     <script>
