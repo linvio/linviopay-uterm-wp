@@ -18,11 +18,12 @@ function uterm_shortcode($atts) {
 // Shortcode function for Terminal on Payment Mode
 function uterm_payment_shortcode($atts) {
     // Get the secret and public keys from WordPress options and sanitize them
-    $secretKey = esc_attr(get_option('secret_key', ''));
-    $publicKey = esc_attr(get_option('public_key', ''));
-    $products = esc_attr(get_option('products', ''));
-    $isAmountUpdatable = esc_attr(get_option('is_amount_updatable', ''));
-    $mappings = get_option('mappings', "");
+    $keys = get_linvio_api_keys();
+    $publicKey = $keys['public_key'];
+    $secretKey = $keys['secret_key'];
+    $products = esc_attr(get_option('uterm_products', ''));
+    $isAmountUpdatable = esc_attr(get_option('uterm_is_amount_updatable', ''));
+    $mappings = get_option('uterm_mappings', "");
 
     $product_data = parse_product_data($products);
     $default_product_id = array_key_first($product_data);
@@ -35,44 +36,51 @@ function uterm_payment_shortcode($atts) {
 
     // Make a POST request to create a test payment via the LinvioPay API.
     // IMPORTANT: For connecting this payment to your Salesforce Org data
-    // please use the mappings request field. 
+    // please use the mappings request field.
     // See the API documentation for more information on how to use this field.
     $payment_mappings = get_payment_mappings($mappings);
-    $response = wp_remote_post('https://dev-api.linviopay.com/v2/payments', [
-        'headers' => [
+    $params = [
+        'headers' => json_encode([
             'Authorization' => "Bearer $secretKey",
             'Content-Type'  => 'application/json',
-        ],
+        ]),
         'body'    => json_encode([
             'amount' => $amount,
             'name' => 'Test Payment',
             "source_terminal" => "uterm",
             'is_amount_updatable' => $isAmountUpdatable,
             'mappings' => $payment_mappings
-        ]),
-    ]);
+        ])];
+    $base_api_url = get_base_api_url($secretKey);
+    $response = wp_remote_post("$base_api_url/v2/payments", $params);
 
     if (is_wp_error($response)) {
         error_log('Error: ' . $response->get_error_message());
         return '<div>Failed to create Terminal Payment.</div>';
     }
-    
+
     // Retrieve the HTTP status code and response body.
     $status_code = wp_remote_retrieve_response_code($response);
     $body = wp_remote_retrieve_body($response);
 
     // Decode the JSON response and extract the payment id.
     $data = json_decode($body);
-    $id = $data->id;
+    $id = null;
+    if ($data->status === 'error') {
+        error_log($body);
+    } else {
+        $id = $data->id;
+    }
 
     // Create the terminal container div and JavaScript block that initializes the uTerm widget.
     // This code will replace the shortcode inserted in the page.
+    $env = get_terminal_environment($secretKey);
     $uterm_panel = "<div id=\"terminal\" class=\"flex justify-center\">Loading Terminal...</div>";
     $uterm_script = "
         <script type=\"text/javascript\">
             const configuration = {
                 linvioPayPublicKey: '$publicKey',
-                mode: 'dev',
+                mode: '$env',
                 paymentId: '$id'
             }
             const startUterm = () => {
@@ -94,8 +102,9 @@ function uterm_payment_shortcode($atts) {
 // Shortcode function for Terminal on Payment Method mode
 function uterm_payment_method_shortcode($atts) {
     // Get the secret and public keys from WordPress options and sanitize them
-    $secretKey = esc_attr(get_option('secret_key', ''));
-    $publicKey = esc_attr(get_option('public_key', ''));
+    $keys = get_linvio_api_keys();
+    $publicKey = $keys['public_key'];
+    $secretKey = $keys['secret_key'];
 
     $contact_sync_id = $_GET['cid'];
     if(empty($contact_sync_id)) {
@@ -126,17 +135,21 @@ function uterm_payment_method_shortcode($atts) {
 
     // Create LinvioPay Payment Method
     $linviopay_payment_method_data = create_linviopay_payment_method($contact_id, $secretKey);
+    if($linviopay_payment_method_data == null) {
+        return '<div>Failed creating payment method.</div>';
+    }
     $linviopay_payment_method = json_decode($linviopay_payment_method_data, true);
     $linviopay_payment_method_id = $linviopay_payment_method['id'];
 
     // Create the terminal container div and JavaScript block that initializes the uTerm widget.
     // This code will replace the shortcode inserted in the page.
+    $env = get_terminal_environment($secretKey);
     $uterm_panel = "<div id=\"terminal\" class=\"flex justify-center\">Loading Terminal...</div>";
     $uterm_script = "
         <script type=\"text/javascript\">
             const configuration = {
                 linvioPayPublicKey: '$publicKey',
-                mode: 'dev',
+                mode: '$env',
                 paymentMethodId: '$linviopay_payment_method_id'
             }
             const startUterm = () => {
@@ -160,8 +173,11 @@ add_shortcode('uterm', 'uterm_shortcode');
 
 // Enqueue the Universal Terminal JS and CSS files
 function enqueue_uterm_files() {
-    wp_enqueue_script('uterm-js', 'https://uterm-dev.linviopay.com/assets/uterm.js', [], false, true);
-    wp_enqueue_style('uterm-css', 'https://uterm-dev.linviopay.com/assets/uterm.css', [], false);
+    $keys = get_linvio_api_keys();
+    $secretKey = $keys['secret_key'];
+    $base_static_url = get_base_static_url($secretKey);
+    wp_enqueue_script('uterm-js', "$base_static_url/assets/uterm.js", [], false, true);
+    wp_enqueue_style('uterm-css', "$base_static_url/assets/uterm.css", [], false);
 }
 
 add_action('wp_enqueue_scripts', 'enqueue_uterm_files');
