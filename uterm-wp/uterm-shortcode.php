@@ -74,12 +74,13 @@ function uterm_payment_shortcode($atts) {
 
     // Create the terminal container div and JavaScript block that initializes the uTerm widget.
     // This code will replace the shortcode inserted in the page.
+    $env = get_terminal_environment($secretKey);
     $uterm_panel = "<div id=\"terminal\" class=\"flex justify-center\">Loading Terminal...</div>";
     $uterm_script = "
         <script type=\"text/javascript\">
             const configuration = {
                 linvioPayPublicKey: '$publicKey',
-                mode: 'dev',
+                mode: '$env',
                 paymentId: '$id'
             }
             const startUterm = () => {
@@ -142,12 +143,13 @@ function uterm_payment_method_shortcode($atts) {
 
     // Create the terminal container div and JavaScript block that initializes the uTerm widget.
     // This code will replace the shortcode inserted in the page.
+    $env = get_terminal_environment($secretKey);
     $uterm_panel = "<div id=\"terminal\" class=\"flex justify-center\">Loading Terminal...</div>";
     $uterm_script = "
         <script type=\"text/javascript\">
             const configuration = {
                 linvioPayPublicKey: '$publicKey',
-                mode: 'dev',
+                mode: '$env',
                 paymentMethodId: '$linviopay_payment_method_id'
             }
             const startUterm = () => {

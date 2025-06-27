@@ -171,3 +171,13 @@ function get_base_static_url($secretKey) {
     }
     return $base_static_url;
 }
+
+function get_terminal_environment($secretKey) {
+    $env = 'dev';
+    if(str_starts_with($secretKey, 'cs_test_')) {
+        $env = 'test';
+    } else if(str_starts_with($secretKey, 'cs_prod_')) {
+        $env = 'prod';
+    }
+    return $env;
+}
